@@ -1,0 +1,173 @@
+From fbf447a97074f26f6e96b59934858147e828cd75 Mon Sep 17 00:00:00 2001
+From: "Wang, Long" <long1.wang@intel.com>
+Date: Tue, 11 Jun 2019 15:06:22 +0800
+Subject: [PATCH] Stateless
+
+---
+ bin/catalina.sh     | 20 +++++++++++++-------
+ bin/daemon.sh       | 19 ++++++++++++++-----
+ bin/makebase.sh     |  5 ++++-
+ bin/tool-wrapper.sh |  2 ++
+ 4 files changed, 33 insertions(+), 13 deletions(-)
+
+diff --git a/bin/catalina.sh b/bin/catalina.sh
+index 5a8c2b5..4d887db 100755
+--- a/bin/catalina.sh
++++ b/bin/catalina.sh
+@@ -145,10 +145,12 @@ PRGDIR=`dirname "$PRG"`
+ # but allow them to be specified in setenv.sh, in rare case when it is needed.
+ CLASSPATH=
+ 
+-if [ -r "$CATALINA_BASE/bin/setenv.sh" ]; then
++if [ -r "$CATALINA_BASE/bin/setenv.sh" -a "$CATALINA_BASE" != "$CATALINA_HOME" ]; then
+   . "$CATALINA_BASE/bin/setenv.sh"
+ elif [ -r "$CATALINA_HOME/bin/setenv.sh" ]; then
+   . "$CATALINA_HOME/bin/setenv.sh"
++elif [ -r "/etc/tomcat/setenv.sh" ]; then
++  . "/etc/tomcat/setenv.sh"
+ fi
+ 
+ # For Cygwin, ensure paths are in UNIX format before anything is touched
+@@ -210,12 +212,14 @@ fi
+ CLASSPATH="$CLASSPATH""$CATALINA_HOME"/bin/bootstrap.jar
+ 
+ if [ -z "$CATALINA_OUT" ] ; then
+-  CATALINA_OUT="$CATALINA_BASE"/logs/catalina.out
++  CATALINA_OUT=/var/log/tomcat/catalina.out
+ fi
+ 
+-if [ -z "$CATALINA_TMPDIR" ] ; then
++if [ -z "$CATALINA_TMPDIR" -a "$CATALINA_BASE" != "$CATALINA_HOME" ] ; then
+   # Define the java.io.tmpdir to use for Catalina
+   CATALINA_TMPDIR="$CATALINA_BASE"/temp
++else
++  CATALINA_TMPDIR=/tmp
+ fi
+ 
+ # Add tomcat-juli.jar to classpath
+@@ -254,8 +258,10 @@ JAVA_OPTS="$JAVA_OPTS -Djava.protocol.handler.pkgs=org.apache.catalina.webresour
+ 
+ # Set juli LogManager config file if it is present and an override has not been issued
+ if [ -z "$LOGGING_CONFIG" ]; then
+-  if [ -r "$CATALINA_BASE"/conf/logging.properties ]; then
++  if [ -r "$CATALINA_BASE"/conf/logging.properties -a "$CATALINA_BASE" != "$CATALINA_HOME" ]; then
+     LOGGING_CONFIG="-Djava.util.logging.config.file=$CATALINA_BASE/conf/logging.properties"
++  elif [ -r /usr/share/defaults/tomcat/logging.properties ]; then
++    LOGGING_CONFIG="-Djava.util.logging.config.file=/usr/share/defaults/tomcat/logging.properties"
+   else
+     # Bugzilla 45585
+     LOGGING_CONFIG="-Dnop"
+@@ -356,7 +362,7 @@ if [ "$1" = "debug" ] ; then
+         -classpath "$CLASSPATH" \
+         -sourcepath "$CATALINA_HOME"/../../java \
+         -Djava.security.manager \
+-        -Djava.security.policy=="$CATALINA_BASE"/conf/catalina.policy \
++        -Djava.security.policy==/usr/share/defaults/tomcat/catalina.policy \
+         -Dcatalina.base="$CATALINA_BASE" \
+         -Dcatalina.home="$CATALINA_HOME" \
+         -Djava.io.tmpdir="$CATALINA_TMPDIR" \
+@@ -385,7 +391,7 @@ elif [ "$1" = "run" ]; then
+       -D$ENDORSED_PROP="\"$JAVA_ENDORSED_DIRS\"" \
+       -classpath "\"$CLASSPATH\"" \
+       -Djava.security.manager \
+-      -Djava.security.policy=="\"$CATALINA_BASE/conf/catalina.policy\"" \
++      -Djava.security.policy=="\"/usr/share/defaults/tomcat/catalina.policy\"" \
+       -Dcatalina.base="\"$CATALINA_BASE\"" \
+       -Dcatalina.home="\"$CATALINA_HOME\"" \
+       -Djava.io.tmpdir="\"$CATALINA_TMPDIR\"" \
+@@ -453,7 +459,7 @@ elif [ "$1" = "start" ] ; then
+       -D$ENDORSED_PROP="\"$JAVA_ENDORSED_DIRS\"" \
+       -classpath "\"$CLASSPATH\"" \
+       -Djava.security.manager \
+-      -Djava.security.policy=="\"$CATALINA_BASE/conf/catalina.policy\"" \
++      -Djava.security.policy=="\"/usr/share/defaults/tomcat/catalina.policy\"" \
+       -Dcatalina.base="\"$CATALINA_BASE\"" \
+       -Dcatalina.home="\"$CATALINA_HOME\"" \
+       -Djava.io.tmpdir="\"$CATALINA_TMPDIR\"" \
+diff --git a/bin/daemon.sh b/bin/daemon.sh
+index afa4c89..214a0da 100755
+--- a/bin/daemon.sh
++++ b/bin/daemon.sh
+@@ -129,18 +129,25 @@ test ".$SERVICE_START_WAIT_TIME" = . && SERVICE_START_WAIT_TIME=10
+ # but allow them to be specified in setenv.sh, in rare case when it is needed.
+ CLASSPATH=
+ JAVA_OPTS=
+-if [ -r "$CATALINA_BASE/bin/setenv.sh" ]; then
++if [ -r "$CATALINA_BASE/bin/setenv.sh" -a "$CATALINA_BASE" != "$CATALINA_HOME" ]; then
+   . "$CATALINA_BASE/bin/setenv.sh"
+ elif [ -r "$CATALINA_HOME/bin/setenv.sh" ]; then
+   . "$CATALINA_HOME/bin/setenv.sh"
++elif [ -r "/etc/tomcat/setenv.sh" ]; then
++  . "/etc/tomcat/setenv.sh"
+ fi
+ 
+ # Add on extra jar files to CLASSPATH
+ test ".$CLASSPATH" != . && CLASSPATH="$CLASSPATH:"
+ CLASSPATH="$CLASSPATH$CATALINA_HOME/bin/bootstrap.jar:$CATALINA_HOME/bin/commons-daemon.jar"
+ 
+-test ".$CATALINA_OUT" = . && CATALINA_OUT="$CATALINA_BASE/logs/catalina-daemon.out"
+-test ".$CATALINA_TMP" = . && CATALINA_TMP="$CATALINA_BASE/temp"
++test ".$CATALINA_OUT" = . && CATALINA_OUT="/var/log/tomcat/catalina-daemon.out"
++if [ -z "$CATALINA_TMP" -a "$CATALINA_BASE" != "$CATALINA_HOME" ] ; then
++  CATALINA_TMP="$CATALINA_BASE"/temp
++else
++  CATALINA_TMP=/tmp
++fi
++
+ 
+ # Add tomcat-juli.jar to classpath
+ # tomcat-juli.jar can be over-ridden per instance
+@@ -151,8 +158,10 @@ else
+ fi
+ # Set juli LogManager config file if it is present and an override has not been issued
+ if [ -z "$LOGGING_CONFIG" ]; then
+-  if [ -r "$CATALINA_BASE/conf/logging.properties" ]; then
++  if [ -r "$CATALINA_BASE/conf/logging.properties" -a "$CATALINA_BASE" != "$CATALINA_HOME" ]; then
+     LOGGING_CONFIG="-Djava.util.logging.config.file=$CATALINA_BASE/conf/logging.properties"
++  elif [ -r /usr/share/defaults/tomcat/logging.properties ]; then
++    LOGGING_CONFIG="-Djava.util.logging.config.file=/usr/share/defaults/tomcat/logging.properties"
+   else
+     # Bugzilla 45585
+     LOGGING_CONFIG="-Dnop"
+@@ -163,7 +172,7 @@ test ".$LOGGING_MANAGER" = . && LOGGING_MANAGER="-Djava.util.logging.manager=org
+ JAVA_OPTS="$JAVA_OPTS $LOGGING_MANAGER"
+ 
+ # Set -pidfile
+-test ".$CATALINA_PID" = . && CATALINA_PID="$CATALINA_BASE/logs/catalina-daemon.pid"
++test ".$CATALINA_PID" = . && CATALINA_PID="/var/log/tomcat/catalina-daemon.pid"
+ 
+ # Increase the maximum file descriptors if we can
+ if [ "$cygwin" = "false" ]; then
+diff --git a/bin/makebase.sh b/bin/makebase.sh
+index 2b6eada..c8fb244 100755
+--- a/bin/makebase.sh
++++ b/bin/makebase.sh
+@@ -97,8 +97,11 @@ else
+ fi
+ 
+ # copy setenv.sh if exists
+-[ -f "$CATALINA_HOME/bin/setenv.sh" ] && \
++if [ -f "$CATALINA_HOME/bin/setenv.sh" ]; then
+     cp "$CATALINA_HOME/bin/setenv.sh" "$BASE_TGT/bin/"
++elif [ -f "/etc/tomcat/setenv.sh" ]; then
++    cp "/etc/tomcat/setenv.sh" "$BASE_TGT/bin/"
++fi
+ 
+ echo "Created CATALINA_BASE directory at $BASE_TGT"
+ 
+diff --git a/bin/tool-wrapper.sh b/bin/tool-wrapper.sh
+index f9924da..deea6eb 100755
+--- a/bin/tool-wrapper.sh
++++ b/bin/tool-wrapper.sh
+@@ -76,6 +76,8 @@ CLASSPATH=
+ 
+ if [ -r "$CATALINA_HOME/bin/setenv.sh" ]; then
+   . "$CATALINA_HOME/bin/setenv.sh"
++elif [ -r "/etc/tomcat/setenv.sh" ]; then
++  . "/etc/tomcat/setenv.sh"
+ fi
+ 
+ # For Cygwin, ensure paths are in UNIX format before anything is touched
+-- 
+2.21.0
+

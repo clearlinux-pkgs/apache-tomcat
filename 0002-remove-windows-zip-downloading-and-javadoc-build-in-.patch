@@ -1,0 +1,100 @@
+From 8804306b0b4807ae49e9769003d8476a58bb4206 Mon Sep 17 00:00:00 2001
+From: "Wang, Long" <long1.wang@intel.com>
+Date: Wed, 5 Jun 2019 13:11:33 +0800
+Subject: [PATCH 2/3] remove windows zip downloading and javadoc build in
+ offline in mock
+
+---
+ build.xml | 55 ++++++-------------------------------------------------
+ 1 file changed, 6 insertions(+), 49 deletions(-)
+
+diff --git a/build.xml b/build.xml
+index f62cb76..543b2c1 100644
+--- a/build.xml
++++ b/build.xml
+@@ -1840,23 +1840,6 @@
+     <fixcrlf srcdir="${tomcat.dist}/bin" includes="*.bat" eol="crlf" encoding="ISO-8859-1" fixlast="false" />
+     <chmod      dir="${tomcat.dist}/bin" includes="*.sh"  perm="+x"/>
+ 
+-    <!-- Windows binaries -->
+-    <!-- 32 bit -->
+-    <copy file="${commons-daemon.home}/windows/prunsrv.exe"
+-        tofile="${tomcat.dist}/bin/tomcat${version.major}.exe" />
+-    <copy file="${commons-daemon.home}/windows/prunmgr.exe"
+-        tofile="${tomcat.dist}/bin/tomcat${version.major}w.exe" />
+-    <!-- 64 bit amd -->
+-    <copy file="${commons-daemon.home}/windows/amd64/prunsrv.exe"
+-        tofile="${tomcat.dist}/bin/x64/tomcat${version.major}.exe" />
+-    <!-- tc native -->
+-    <copy todir="${tomcat.dist}/bin">
+-      <fileset dir="${tomcat-native.home}/bin">
+-        <include name="*.dll"/>
+-        <include name="**/*.dll"/>
+-      </fileset>
+-    </copy>
+-
+     <!-- Source bundles for native components -->
+     <copy tofile="${tomcat.dist}/bin/tomcat-native.tar.gz"
+             file="${tomcat-native.tar.gz}" />
+@@ -1975,9 +1958,12 @@ Apache Tomcat ${version} native binaries for Win64 AMD64/EMT64 platform.
+       <link href="../jspapi"/>
+       <link href="../elapi"/>
+       <link href="../websocketapi"/>
+-      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
+-      <link href="https://commons.apache.org/proper/commons-io/javadocs/api-release/"/>
+-      <link href="https://javaee.github.io/javaee-spec/javadocs/"/>
++	  <link href="http://docs.oracle.com/javase/8/docs/api/"
++		offline="true" packagelistloc="{javadoc.oracle.offline}"/>
++	  <link href="https://commons.apache.org/proper/commons-io/javadocs/api-release/"
++		offline="true" packagelistloc="{javadoc.apache.offline}"/>
++	  <link href="https://javaee.github.io/javaee-spec/javadocs/"
++		offline="true" packagelistloc="{javadoc.github.offline}"/>
+       <packageset dir="${tomcat.dist}/src/java/">
+         <include name="org/**"/>
+         <exclude name="org/apache/el/parser/**"/>
+@@ -2840,16 +2826,6 @@ skip.installer property in build.properties" />
+       <param name="checksum.value" value="${tomcat-native.src.checksum.value}"/>
+     </antcall>
+ 
+-    <antcall target="downloadzip-2">
+-      <param name="sourcefile.1" value="${tomcat-native.win.1}"/>
+-      <param name="sourcefile.2" value="${tomcat-native.win.2}"/>
+-      <param name="destfile" value="${tomcat-native.home}/LICENSE"/>
+-      <param name="destdir" value="${tomcat-native.home}"/>
+-      <param name="checksum.enabled" value="${tomcat-native.win.checksum.enabled}"/>
+-      <param name="checksum.algorithm" value="${tomcat-native.win.checksum.algorithm}"/>
+-      <param name="checksum.value" value="${tomcat-native.win.checksum.value}"/>
+-    </antcall>
+-
+     <antcall target="downloadfile-2">
+       <param name="sourcefile.1" value="${commons-daemon.native.src.loc.1}"/>
+       <param name="sourcefile.2" value="${commons-daemon.native.src.loc.2}"/>
+@@ -2860,25 +2836,6 @@ skip.installer property in build.properties" />
+       <param name="checksum.value" value="${commons-daemon.native.src.checksum.value}"/>
+     </antcall>
+ 
+-    <antcall target="downloadzip-2">
+-      <param name="sourcefile.1" value="${commons-daemon.native.win.loc.1}"/>
+-      <param name="sourcefile.2" value="${commons-daemon.native.win.loc.2}"/>
+-      <param name="destfile" value="${commons-daemon.native.win.mgr.exe}"/>
+-      <param name="destdir" value="${commons-daemon.native.win.home}"/>
+-      <param name="checksum.enabled" value="${commons-daemon.native.win.checksum.enabled}"/>
+-      <param name="checksum.algorithm" value="${commons-daemon.native.win.checksum.algorithm}"/>
+-      <param name="checksum.value" value="${commons-daemon.native.win.checksum.value}"/>
+-    </antcall>
+-
+-    <antcall target="downloadzip">
+-      <param name="sourcefile" value="${nsis.loc}"/>
+-      <param name="destfile" value="${nsis.exe}"/>
+-      <param name="destdir" value="${nsis.home}/.."/>
+-      <param name="checksum.enabled" value="${nsis.checksum.enabled}"/>
+-      <param name="checksum.algorithm" value="${nsis.checksum.algorithm}"/>
+-      <param name="checksum.value" value="${nsis.checksum.value}"/>
+-    </antcall>
+-
+   </target>
+ 
+   <!-- =============== Utility Targets to support downloads ================ -->
+-- 
+2.21.0
+

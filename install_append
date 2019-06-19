@@ -1,0 +1,10 @@
+mkdir -p %{buildroot}/usr/share/doc/apache-tomcat
+tar -xf output/release/v9.0.20/bin/apache-tomcat-9.0.20-fulldocs.tar.gz -C %{buildroot}/usr/share/doc/apache-tomcat --strip-components=1
+mkdir -p %{buildroot}/usr/share/apache-tomcat
+tar -xf output/release/v9.0.20/bin/apache-tomcat-9.0.20.tar.gz -C %{buildroot}/usr/share/apache-tomcat/ --strip-components=1
+mkdir -p %{buildroot}/usr/bin
+cd %{buildroot}/usr/bin
+find ../share/apache-tomcat/bin -type f -name *.sh -exec ln -s {} . \;
+cd -
+install -d -m 750 %{buildroot}/usr/share/defaults/tomcat/conf/
+install -p -D -m 600 %{buildroot}/usr/share/apache-tomcat/conf/* %{buildroot}/usr/share/defaults/tomcat/conf/
