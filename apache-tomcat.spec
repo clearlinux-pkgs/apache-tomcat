@@ -4,7 +4,7 @@
 #
 Name     : apache-tomcat
 Version  : 9.0.20
-Release  : 1
+Release  : 2
 URL      : https://github.com/apache/tomcat/archive/9.0.20.tar.gz
 Source0  : https://github.com/apache/tomcat/archive/9.0.20.tar.gz
 Summary  : No detailed summary available
