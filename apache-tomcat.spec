@@ -4,7 +4,7 @@
 #
 Name     : apache-tomcat
 Version  : 9.0.20
-Release  : 2
+Release  : 3
 URL      : https://github.com/apache/tomcat/archive/9.0.20.tar.gz
 Source0  : https://github.com/apache/tomcat/archive/9.0.20.tar.gz
 Summary  : No detailed summary available
@@ -13,6 +13,7 @@ License  : Apache-2.0 CDDL-1.0 EPL-1.0
 Requires: apache-tomcat-bin = %{version}-%{release}
 Requires: apache-tomcat-data = %{version}-%{release}
 Requires: apache-tomcat-license = %{version}-%{release}
+Requires: openjdk
 BuildRequires : apache-ant
 BuildRequires : apache-tomcat-dep
 BuildRequires : openjdk
@@ -94,7 +95,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1560923280
+export SOURCE_DATE_EPOCH=1562210672
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -107,7 +108,7 @@ make  %{?_smp_mflags} || ant release
 
 
 %install
-export SOURCE_DATE_EPOCH=1560923280
+export SOURCE_DATE_EPOCH=1562210672
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/apache-tomcat
 cp LICENSE %{buildroot}/usr/share/package-licenses/apache-tomcat/LICENSE
