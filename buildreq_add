@@ -1,6 +1,12 @@
 # This file contains additional build requirements that did not get
 # picked up automatically. One name per line, no whitespace.
 apache-ant
-openjdk-dev
+mvn-biz.aQute.bnd
+mvn-biz.aQute.bndlib
+mvn-commons-daemon
+mvn-ecj
+mvn-geronimo-spec-jaxrpc
+mvn-saaj-api
+mvn-wsdl4j
 openjdk
-apache-tomcat-dep
+openjdk-dev

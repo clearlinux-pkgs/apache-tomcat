@@ -4,28 +4,35 @@
 #
 Name     : apache-tomcat
 Version  : 9.0.20
-Release  : 3
+Release  : 4
 URL      : https://github.com/apache/tomcat/archive/9.0.20.tar.gz
 Source0  : https://github.com/apache/tomcat/archive/9.0.20.tar.gz
+Source1  : https://archive.apache.org/dist/commons/daemon/source/commons-daemon-1.1.0-native-src.tar.gz
+Source2  : https://archive.apache.org/dist/tomcat/tomcat-connectors/native/1.2.21/source/tomcat-native-1.2.21-src.tar.gz
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : Apache-2.0 CDDL-1.0 EPL-1.0
 Requires: apache-tomcat-bin = %{version}-%{release}
 Requires: apache-tomcat-data = %{version}-%{release}
-Requires: apache-tomcat-license = %{version}-%{release}
 Requires: openjdk
 BuildRequires : apache-ant
-BuildRequires : apache-tomcat-dep
+BuildRequires : buildreq-mvn
+BuildRequires : mvn-biz.aQute.bnd
+BuildRequires : mvn-biz.aQute.bndlib
+BuildRequires : mvn-commons-daemon
+BuildRequires : mvn-ecj
+BuildRequires : mvn-geronimo-spec-jaxrpc
+BuildRequires : mvn-saaj-api
+BuildRequires : mvn-wsdl4j
 BuildRequires : openjdk
 BuildRequires : openjdk-dev
-Patch1: 0001-skip-windows-installer.patch
-Patch2: 0002-remove-windows-zip-downloading-and-javadoc-build-in-.patch
-Patch3: 0003-Stateless.patch
+Patch1: 0002-remove-windows-zip-downloading-and-javadoc-build-in-.patch
+Patch2: 0003-Stateless.patch
 
 %description
 ## Welcome to Apache Tomcat!
 ### What Is It?
-The Apache TomcatÂ® software is an open source implementation of the Java
+The Apache Tomcat® software is an open source implementation of the Java
 Servlet, JavaServer Pages, Java Expression Language and Java WebSocket
 technologies. The Java Servlet, JavaServer Pages, Java Expression Language and
 Java WebSocket specifications are developed under the
@@ -35,7 +42,6 @@ Java WebSocket specifications are developed under the
 Summary: bin components for the apache-tomcat package.
 Group: Binaries
 Requires: apache-tomcat-data = %{version}-%{release}
-Requires: apache-tomcat-license = %{version}-%{release}
 
 %description bin
 bin components for the apache-tomcat package.
@@ -57,67 +63,37 @@ Group: Documentation
 doc components for the apache-tomcat package.
 
 
-%package license
-Summary: license components for the apache-tomcat package.
-Group: Default
-
-%description license
-license components for the apache-tomcat package.
-
-
 %prep
 %setup -q -n tomcat-9.0.20
+cd ..
+%setup -q -T -D -n tomcat-9.0.20 -b 2
+cd ..
+%setup -q -T -D -n tomcat-9.0.20 -b 1
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
 
 %build
 ## build_prepend content
-mkdir -p /builddir/tomcat-build-libs/commons-daemon-1.1.0
-tar -xf /usr/share/apache-tomcat/commons-daemon-1.1.0-bin.tar.gz -C /builddir/tomcat-build-libs/
-mkdir -p /builddir/tomcat-build-libs/ecj-4.10
-cp /usr/share/apache-tomcat/ecj-4.10.jar /builddir/tomcat-build-libs/ecj-4.10
-mkdir -p /builddir/tomcat-build-libs/saaj-api-1.3.5
-cp /usr/share/apache-tomcat/saaj-api-1.3.5.jar /builddir/tomcat-build-libs/saaj-api-1.3.5
-mkdir -p /builddir/tomcat-build-libs/jaxrpc-1.1-rc4
-cp /usr/share/apache-tomcat/geronimo-spec-jaxrpc-1.1-rc4.jar /builddir/tomcat-build-libs/jaxrpc-1.1-rc4
-mkdir -p /builddir/tomcat-build-libs/wsdl4j-1.6.3
-cp /usr/share/apache-tomcat/wsdl4j-1.6.3.jar /builddir/tomcat-build-libs/wsdl4j-1.6.3
-mkdir -p /builddir/tomcat-build-libs/bnd-4.0.0
-cp /usr/share/apache-tomcat/biz.aQute.bnd-4.0.0.jar /builddir/tomcat-build-libs/bnd-4.0.0
-mkdir -p /builddir/tomcat-build-libs/bndlib-4.0.0
-cp /usr/share/apache-tomcat/biz.aQute.bndlib-4.0.0.jar /builddir/tomcat-build-libs/bndlib-4.0.0
-mkdir -p /builddir/tomcat-build-libs/tomcat-native-1.2.21
-cp /usr/share/apache-tomcat/tomcat-native-1.2.21-src.tar.gz /builddir/tomcat-build-libs/tomcat-native-1.2.21/tomcat-native.tar.gz
-cp /usr/share/apache-tomcat/commons-daemon-1.1.0-native-src.tar.gz /builddir/tomcat-build-libs/commons-daemon-1.1.0
+mkdir -p tomcat-build-libs/commons-daemon-1.1.0
+cp %{SOURCE1} tomcat-build-libs/commons-daemon-1.1.0/
+mkdir -p tomcat-build-libs/tomcat-native-1.2.21
+cp %{SOURCE2} tomcat-build-libs/tomcat-native-1.2.21/tomcat-native.tar.gz
 ## build_prepend end
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-export LANG=C
-export SOURCE_DATE_EPOCH=1562210672
-export GCC_IGNORE_WERROR=1
-export AR=gcc-ar
-export RANLIB=gcc-ranlib
-export NM=gcc-nm
-export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export FCFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export FFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
-make  %{?_smp_mflags} || ant release
-
-
+export ANT_HOME=/usr/share/ant
+ant release -Dskip.installer=true \
+-Dbase.path=./tomcat-build-libs \
+-Dcommons-daemon.jar=/usr/share/java/.m2/repository/commons-daemon/commons-daemon/1.1.0/commons-daemon-1.1.0.jar \
+-Djdt.jar=/usr/share/java/.m2/repository/org/eclipse/jdt/core/compiler/ecj/ecj-4.10.jar \
+-Dbndlib.jar=/usr/share/java/.m2/repository/biz/aQute/bnd/biz.aQute.bndlib/4.0.0/biz.aQute.bndlib-4.0.0.jar \
+-Dsaaj-api.jar=/usr/share/java/.m2/repository/javax/xml/soap/saaj-api/1.3.5/saaj-api-1.3.5.jar \
+-Djaxrpc-lib.jar=/usr/share/java/.m2/repository/geronimo-spec/geronimo-spec-jaxrpc/1.1-rc4/geronimo-spec-jaxrpc-1.1-rc4.jar \
+-Dwsdl4j-lib.jar=/usr/share/java/.m2/repository/wsdl4j/wsdl4j/1.6.3/wsdl4j-1.6.3.jar \
+-Dbnd.jar=/usr/share/java/.m2/repository/biz/aQute/bnd/biz.aQute.bnd/4.0.0/biz.aQute.bnd-4.0.0.jar
 %install
-export SOURCE_DATE_EPOCH=1562210672
-rm -rf %{buildroot}
-mkdir -p %{buildroot}/usr/share/package-licenses/apache-tomcat
-cp LICENSE %{buildroot}/usr/share/package-licenses/apache-tomcat/LICENSE
-cp modules/jdbc-pool/LICENSE %{buildroot}/usr/share/package-licenses/apache-tomcat/modules_jdbc-pool_LICENSE
-cp modules/jdbc-pool/NOTICE %{buildroot}/usr/share/package-licenses/apache-tomcat/modules_jdbc-pool_NOTICE
-cp res/INSTALLLICENSE %{buildroot}/usr/share/package-licenses/apache-tomcat/res_INSTALLLICENSE
-cp res/META-INF/default.license %{buildroot}/usr/share/package-licenses/apache-tomcat/res_META-INF_default.license
-cp res/META-INF/servlet-api.jar.license %{buildroot}/usr/share/package-licenses/apache-tomcat/res_META-INF_servlet-api.jar.license
-:
+
 ## install_append content
 mkdir -p %{buildroot}/usr/share/doc/apache-tomcat
 tar -xf output/release/v9.0.20/bin/apache-tomcat-9.0.20-fulldocs.tar.gz -C %{buildroot}/usr/share/doc/apache-tomcat --strip-components=1
@@ -808,12 +784,3 @@ install -p -D -m 600 %{buildroot}/usr/share/apache-tomcat/conf/* %{buildroot}/us
 %files doc
 %defattr(0644,root,root,0755)
 %doc /usr/share/doc/apache\-tomcat/*
-
-%files license
-%defattr(0644,root,root,0755)
-/usr/share/package-licenses/apache-tomcat/LICENSE
-/usr/share/package-licenses/apache-tomcat/modules_jdbc-pool_LICENSE
-/usr/share/package-licenses/apache-tomcat/modules_jdbc-pool_NOTICE
-/usr/share/package-licenses/apache-tomcat/res_INSTALLLICENSE
-/usr/share/package-licenses/apache-tomcat/res_META-INF_default.license
-/usr/share/package-licenses/apache-tomcat/res_META-INF_servlet-api.jar.license

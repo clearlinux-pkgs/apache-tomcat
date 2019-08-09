@@ -1,17 +1,22 @@
-mkdir -p /builddir/tomcat-build-libs/commons-daemon-1.1.0
-tar -xf /usr/share/apache-tomcat/commons-daemon-1.1.0-bin.tar.gz -C /builddir/tomcat-build-libs/
-mkdir -p /builddir/tomcat-build-libs/ecj-4.10
-cp /usr/share/apache-tomcat/ecj-4.10.jar /builddir/tomcat-build-libs/ecj-4.10
-mkdir -p /builddir/tomcat-build-libs/saaj-api-1.3.5
-cp /usr/share/apache-tomcat/saaj-api-1.3.5.jar /builddir/tomcat-build-libs/saaj-api-1.3.5
-mkdir -p /builddir/tomcat-build-libs/jaxrpc-1.1-rc4
-cp /usr/share/apache-tomcat/geronimo-spec-jaxrpc-1.1-rc4.jar /builddir/tomcat-build-libs/jaxrpc-1.1-rc4
-mkdir -p /builddir/tomcat-build-libs/wsdl4j-1.6.3
-cp /usr/share/apache-tomcat/wsdl4j-1.6.3.jar /builddir/tomcat-build-libs/wsdl4j-1.6.3
-mkdir -p /builddir/tomcat-build-libs/bnd-4.0.0
-cp /usr/share/apache-tomcat/biz.aQute.bnd-4.0.0.jar /builddir/tomcat-build-libs/bnd-4.0.0
-mkdir -p /builddir/tomcat-build-libs/bndlib-4.0.0
-cp /usr/share/apache-tomcat/biz.aQute.bndlib-4.0.0.jar /builddir/tomcat-build-libs/bndlib-4.0.0
-mkdir -p /builddir/tomcat-build-libs/tomcat-native-1.2.21
-cp /usr/share/apache-tomcat/tomcat-native-1.2.21-src.tar.gz /builddir/tomcat-build-libs/tomcat-native-1.2.21/tomcat-native.tar.gz
-cp /usr/share/apache-tomcat/commons-daemon-1.1.0-native-src.tar.gz /builddir/tomcat-build-libs/commons-daemon-1.1.0
+mkdir -p tomcat-build-libs/commons-daemon-1.1.0
+cp %{SOURCE1} tomcat-build-libs/commons-daemon-1.1.0/
+mkdir -p tomcat-build-libs/tomcat-native-1.2.21
+cp %{SOURCE2} tomcat-build-libs/tomcat-native-1.2.21/tomcat-native.tar.gz
+
+#mkdir -p /builddir/tomcat-build-libs/commons-daemon-1.1.0
+#tar -xf /usr/share/apache-tomcat/commons-daemon-1.1.0-bin.tar.gz -C /builddir/tomcat-build-libs/
+#mkdir -p /builddir/tomcat-build-libs/ecj-4.10
+#cp /usr/share/apache-tomcat/ecj-4.10.jar /builddir/tomcat-build-libs/ecj-4.10
+#mkdir -p /builddir/tomcat-build-libs/saaj-api-1.3.5
+#cp /usr/share/apache-tomcat/saaj-api-1.3.5.jar /builddir/tomcat-build-libs/saaj-api-1.3.5
+#mkdir -p /builddir/tomcat-build-libs/jaxrpc-1.1-rc4
+#cp /usr/share/apache-tomcat/geronimo-spec-jaxrpc-1.1-rc4.jar /builddir/tomcat-build-libs/jaxrpc-1.1-rc4
+#mkdir -p /builddir/tomcat-build-libs/wsdl4j-1.6.3
+#cp /usr/share/apache-tomcat/wsdl4j-1.6.3.jar /builddir/tomcat-build-libs/wsdl4j-1.6.3
+#mkdir -p /builddir/tomcat-build-libs/bnd-4.0.0
+#cp /usr/share/apache-tomcat/biz.aQute.bnd-4.0.0.jar /builddir/tomcat-build-libs/bnd-4.0.0
+#mkdir -p /builddir/tomcat-build-libs/bndlib-4.0.0
+#cp /usr/share/apache-tomcat/biz.aQute.bndlib-4.0.0.jar /builddir/tomcat-build-libs/bndlib-4.0.0
+#mkdir -p /builddir/tomcat-build-libs/tomcat-native-1.2.21
+#cp /usr/share/apache-tomcat/tomcat-native-1.2.21-src.tar.gz /builddir/tomcat-build-libs/tomcat-native-1.2.21/tomcat-native.tar.gz
+#cp /usr/share/apache-tomcat/commons-daemon-1.1.0-native-src.tar.gz /builddir/tomcat-build-libs/commons-daemon-1.1.0
